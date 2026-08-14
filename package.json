@@ -1,0 +1,42 @@
+{
+  "name": "@bastani/atomic-sme",
+  "version": "0.1.0",
+  "description": "SQLite-backed SME context orchestration for Atomic workflows",
+  "type": "module",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    }
+  },
+  "engines": { "node": ">=22.19" },
+  "keywords": ["atomic-package", "pi-package", "atomic", "sme", "workflow"],
+  "license": "MIT",
+  "files": ["dist", "extensions", "workflows", "docs", "README.md", "LICENSE", "package.json"],
+  "scripts": {
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "npm run clean && tsc -p tsconfig.build.json",
+    "prepack": "npm run build",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "tsx --test test/**/*.test.ts",
+    "check": "npm run build && npm test",
+    "atomic:check": "npm run build && atomic --offline --no-session -e . --list-models >/dev/null"
+  },
+  "peerDependencies": {
+    "@bastani/atomic": "*",
+    "typebox": "*"
+  },
+  "devDependencies": {
+    "@bastani/atomic": "^0.9.12",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typebox": "^1.3.7",
+    "typescript": "^5.7.0"
+  },
+  "atomic": {
+    "extensions": ["./dist/extensions"],
+    "workflows": ["./dist/workflows"]
+  }
+}
