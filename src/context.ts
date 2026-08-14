@@ -23,7 +23,6 @@ const HEADER_SECRET = /\b(?:authorization|proxy-authorization)\s*:\s*(?:Bearer|B
 const EMAIL = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi;
 const PHONE = /(?<![A-Za-z0-9-])(?:\+?\d[\d ()-]{7,}\d)(?![A-Za-z0-9-])/g;
 const UUID = /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi;
-const STRUCTURAL_ID = /(?:^|\.)(?:workflow_run_id|stage_id|source_stage|orchestration_id|request_id|reservation_id|idempotency_key)$/;
 const DEFAULT_MAX_INLINE_BYTES = 32_000;
 const trustedContextProofs = new WeakMap<object, string>();
 const trustedContextClaims = new WeakMap<object, Set<string>>();
@@ -72,7 +71,7 @@ function fieldClass(name: string, policy: ContextPolicy): ContextClassification 
 }
 
 function project(value: JsonValue, policy: ContextPolicy, path: string, state: ProjectionState): JsonValue {
-  if (typeof value === "string") return STRUCTURAL_ID.test(path) ? value : redactText(value);
+  if (typeof value === "string") return redactText(value);
   if (Array.isArray(value)) return value.map((item, index) => project(item, policy, `${path}[${index}]`, state));
   if (!isObject(value)) return value;
   const output: { [key: string]: JsonValue } = {};

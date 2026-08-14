@@ -67,6 +67,50 @@ test("sanitize airlock removes secret and PII", async () => {
   assert.equal(JSON.stringify(result.value).includes("person@example.com"), false);
 });
 
+test("sanitize scrubs nested structural ID values but preserves trusted top-level identity", () => {
+  const nestedStageId = "stage owner nested-stage-owner@example.test token is NESTED_STAGE_TOKEN_ABC12345";
+  const nestedIdempotencyKey = "requester nested-key-owner@example.test token is NESTED_KEY_TOKEN_XYZ67890";
+  const raw = event().raw_context;
+  raw.workflow_run_id = "Run/Exact:ABC_123";
+  raw.stage_id = "Stage/Exact:XYZ_789";
+  raw.raw_input = { metadata: { stage_id: nestedStageId } };
+  raw.raw_output = { metadata: { idempotency_key: nestedIdempotencyKey } };
+
+  const result = sanitize_workflow_context(raw, { redactionPolicy: "strict", artifactFirst: true });
+  assert.equal(result.ok, true);
+  if (!result.ok) return;
+
+  const serialized = JSON.stringify(result.value);
+  assert.equal(serialized.includes(nestedStageId), false);
+  assert.equal(serialized.includes("nested-stage-owner@example.test"), false);
+  assert.equal(serialized.includes("NESTED_STAGE_TOKEN_ABC12345"), false);
+  assert.equal(serialized.includes(nestedIdempotencyKey), false);
+  assert.equal(serialized.includes("nested-key-owner@example.test"), false);
+  assert.equal(serialized.includes("NESTED_KEY_TOKEN_XYZ67890"), false);
+  assert.equal(result.value.workflow_run_id, raw.workflow_run_id);
+  assert.equal(result.value.stage_id, raw.stage_id);
+});
+
+test("safe artifact persistence scrubs nested structural ID values", () => {
+  const nestedStageId = "stage owner artifact-stage-owner@example.test token is ARTIFACT_STAGE_TOKEN_ABC12345";
+  const nestedIdempotencyKey = "requester artifact-key-owner@example.test token is ARTIFACT_KEY_TOKEN_XYZ67890";
+  const artifactDir = mkdtempSync(join(tmpdir(), "atomic-sme-artifacts-"));
+  const ref = writeSafeArtifact(
+    { metadata: { stage_id: nestedStageId, idempotency_key: nestedIdempotencyKey } },
+    artifactDir,
+    "nested-structural-ids",
+    { redactionPolicy: "strict", artifactFirst: true },
+  );
+
+  const persisted = readFileSync(ref.path, "utf8");
+  assert.equal(persisted.includes(nestedStageId), false);
+  assert.equal(persisted.includes("artifact-stage-owner@example.test"), false);
+  assert.equal(persisted.includes("ARTIFACT_STAGE_TOKEN_ABC12345"), false);
+  assert.equal(persisted.includes(nestedIdempotencyKey), false);
+  assert.equal(persisted.includes("artifact-key-owner@example.test"), false);
+  assert.equal(persisted.includes("ARTIFACT_KEY_TOKEN_XYZ67890"), false);
+});
+
 test("claim is idempotent and changed payload is refused", () => {
   const store = setup();
   const first = claim_blocked_stage(event(), store);
