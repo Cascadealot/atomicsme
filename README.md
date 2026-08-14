@@ -4,10 +4,11 @@ SQLite-backed SME context orchestration for Atomic workflows.
 
 ## Status
 
-The first local stage keeps intercom rescue **disabled**. Atomic 0.9.12 has no
+Intercom rescue remains **disabled**. Atomic 0.9.12 has no
 `workflow_stage_blocked` or blocked-stage extension event. The package ships a
-truthful disabled adapter in `extensions/index.ts` and an explicit opt-in
-workflow scaffold; it does not invent a hook or create a second resume path.
+truthful disabled adapter in `extensions/index.ts`. `workflows/sme-orchestrator.ts`
+remains a disabled-rescue status scaffold; it is not the runnable domain demo,
+does not activate rescue, and has no resume effect.
 
 The verified catalog selectors are:
 
@@ -32,6 +33,26 @@ The API returns `{ ok, value }` or `{ ok, error }` rather than throwing domain
 refusals. Each model invocation must happen after a durable claim and budget
 reservation.
 
+## Manual orchestration demo
+
+Run the domain API demo from a source checkout:
+
+```bash
+npm run demo:manual
+```
+
+`examples/manual-orchestration.ts` claims a blocked stage, sanitizes its raw
+context, prepares a bounded strategy, and calls `orchestrate_sme` with an
+injected local `call_sme` mock. It then inspects the persisted round and budget
+state through the public API. Assertions prove that the durable claim and
+prepared request exist before the mock runs.
+
+The demo needs no model configuration or credentials, network access, package
+staging, or rescue activation. It uses a temporary SQLite database and artifact
+directory and removes the whole temporary tree in a `finally` block on success
+or failure. This domain API example is separate from the disabled-rescue status
+scaffold in `workflows/sme-orchestrator.ts`.
+
 ## Source-checkout install and checks
 
 Node `22.19` or newer is required. A clean checkout installs its locked
@@ -42,6 +63,7 @@ npm ci
 npm run lint
 npm run typecheck
 npm run check
+npm run demo:manual
 npm run atomic:check
 ```
 
