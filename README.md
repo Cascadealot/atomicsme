@@ -32,12 +32,38 @@ The API returns `{ ok, value }` or `{ ok, error }` rather than throwing domain
 refusals. Each model invocation must happen after a durable claim and budget
 reservation.
 
-## Local checks
+## Source-checkout install and checks
+
+Node `22.19` or newer is required. A clean checkout installs its locked
+dependencies and builds `dist/` during `npm ci`:
 
 ```bash
-npm install
+npm ci
+npm run lint
+npm run typecheck
 npm run check
-atomic --offline --no-session -e . --list-models
+npm run atomic:check
 ```
+
+`npm run check` runs the ESLint gate, typecheck, existing tests, and the tracked
+clean package smoke test. The smoke test starts without `dist/`, runs
+`npm pack --json`, installs the resulting archive into an empty temporary
+consumer, and imports the package, extension, and workflow entry points.
+
+## Packaged install
+
+From a source checkout, create an archive and install it in a fresh consumer:
+
+```bash
+archive=$(npm pack --silent)
+consumer=$(mktemp -d)
+printf '{"private":true,"type":"module"}\n' > "$consumer/package.json"
+npm install --prefix "$consumer" "$(pwd)/$archive"
+(cd "$consumer" && node --input-type=module -e 'for (const entry of ["@bastani/atomic-sme", "@bastani/atomic-sme/dist/extensions/index.js", "@bastani/atomic-sme/dist/workflows/sme-orchestrator.js"]) await import(entry)')
+rm -rf "$consumer" "$archive"
+```
+
+The package lifecycle rebuilds from a clean state before packing, so a missing
+or stale `dist/` does not affect the generated archive.
 
 Do not publish, release, create a PR, or enable rescue as part of local staging.

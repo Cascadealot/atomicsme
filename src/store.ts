@@ -12,7 +12,7 @@ import type {
   PreparedSMERequest, PurgeReceipt, RedactedAuditExport, RedactedAuditFilter, RecordedRound,
   RemainingDeliberationBudget, ReservationId, ReservedSMECall, Result, SafeSearchQuery,
   SMEAnswer, SMEBlockRescueRequested, SMECallResult, SMEDataRetentionAuthority, SMEPersona,
-  SMEAuditExportAuthority, SMEAuthorityAction, SMEAuthoritySubject, SMEAuthorityVerifier, SMEMemoryPage, SMEQuestion, Source, WorkflowUnblockDecision,
+  SMEAuditExportAuthority, SMEAuthorityAction, SMEAuthoritySubject, SMEAuthorityVerifier, SMEMemoryPage, Source, WorkflowUnblockDecision,
 } from "./types.js";
 
 /**
@@ -800,7 +800,7 @@ function validRescueEvent(event: SMEBlockRescueRequested | undefined): boolean {
 function claimFromRow(row: Row): ClaimedBlockedStage { return { orchestration_id: String(row.id), workflow_run_id: String(row.workflow_run_id), stage_id: String(row.stage_id), idempotency_key: String(row.idempotency_key), payload_hash: String(row.payload_hash) }; }
 function sameClaim(a: ClaimedBlockedStage, b: ClaimedBlockedStage): boolean { return a.orchestration_id === b.orchestration_id && a.workflow_run_id === b.workflow_run_id && a.stage_id === b.stage_id && a.idempotency_key === b.idempotency_key && a.payload_hash === b.payload_hash; }
 function json(value: unknown): string { return JSON.stringify(value); }
-function parse<T = any>(value: unknown): T { return typeof value === "string" ? JSON.parse(value) as T : value as T; }
+function parse<T = unknown>(value: unknown): T { return typeof value === "string" ? JSON.parse(value) as T : value as T; }
 function sleep(ms: number): void { const until = Date.now() + ms; while (Date.now() < until) { /* DatabaseSync does not expose async transactions. */ } }
 function stableJson(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(stableJson).join(",")}]`;
