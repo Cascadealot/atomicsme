@@ -21,9 +21,10 @@
     "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
     "build": "npm run clean && tsc -p tsconfig.build.json && node scripts/prepare-workflow-runtime.mjs",
     "prepare": "npm run build",
-    "lint": "eslint \"src/**/*.ts\" \"extensions/**/*.ts\" \"workflows/**/*.ts\" \"test/**/*.ts\"",
+    "lint": "eslint \"src/**/*.ts\" \"extensions/**/*.ts\" \"workflows/**/*.ts\" \"examples/**/*.ts\" \"test/**/*.ts\"",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsx --test test/**/*.test.ts",
+    "demo:manual": "tsx examples/manual-orchestration.ts",
     "package:smoke": "node test/package-smoke.mjs",
     "check": "npm run build && npm run lint && npm run typecheck && npm test && npm run package:smoke",
     "atomic:check": "npm run build && atomic --offline --no-session -e . --list-models >/dev/null"

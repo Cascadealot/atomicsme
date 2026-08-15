@@ -5,6 +5,7 @@ const maintainedTypeScript = [
   "src/**/*.ts",
   "extensions/**/*.ts",
   "workflows/**/*.ts",
+  "examples/**/*.ts",
   "test/**/*.ts",
 ];
 

@@ -12,6 +12,6 @@
     "declaration": true,
     "types": ["node"]
   },
-  "include": ["src/**/*.ts", "extensions/**/*.ts", "workflows/**/*.ts", "test/**/*.ts"],
+  "include": ["src/**/*.ts", "extensions/**/*.ts", "workflows/**/*.ts", "examples/**/*.ts", "test/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }
